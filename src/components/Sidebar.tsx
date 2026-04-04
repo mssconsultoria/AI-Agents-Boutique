@@ -17,6 +17,7 @@ const VIEW_LABELS: Record<ViewMode, string> = {
   chat: "1:1 lines",
   rituals: "Ritual rooms",
   work: "Work loop",
+  integrations: "Live bridge",
 };
 
 export function Sidebar({

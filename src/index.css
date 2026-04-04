@@ -41,7 +41,8 @@ body {
 
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
 
@@ -231,6 +232,7 @@ label {
 .search-field,
 .field-row input,
 .chat-composer textarea,
+.field-row select,
 .share-link-field {
   width: 100%;
   border-radius: 18px;
@@ -444,6 +446,10 @@ label {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
+.connector-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
 .ritual-room {
   display: flex;
   flex-direction: column;
@@ -601,6 +607,35 @@ label {
 .field-row {
   display: grid;
   gap: 8px;
+}
+
+.compact-field span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.connector-assignment-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.live-runner {
+  display: grid;
+  gap: 14px;
+}
+
+.command-preview {
+  margin: 0;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(6, 13, 13, 0.94);
+  border: 1px solid var(--line);
+  color: #d3ceb9;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.82rem;
 }
 
 .empty-copy {

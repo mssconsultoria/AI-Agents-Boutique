@@ -15,7 +15,7 @@ export type ApprovalKind =
   | "priority_shift"
   | "scope_change"
   | "artifact_publish";
-export type ViewMode = "dashboard" | "chat" | "rituals" | "work";
+export type ViewMode = "dashboard" | "chat" | "rituals" | "work" | "integrations";
 
 export interface Company {
   id: string;

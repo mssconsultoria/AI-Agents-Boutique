@@ -2,11 +2,15 @@ import { startTransition, useEffect, useReducer, useState } from "react";
 import { ChatView } from "./components/ChatView";
 import { ContextRail } from "./components/ContextRail";
 import { DashboardView } from "./components/DashboardView";
+import { IntegrationsView } from "./components/IntegrationsView";
 import { RitualsView } from "./components/RitualsView";
 import { SharedRitualView } from "./components/SharedRitualView";
 import { Sidebar } from "./components/Sidebar";
 import { WorkView } from "./components/WorkView";
 import { trackEvent } from "./lib/analytics";
+import { fetchConnectorCatalog } from "./lib/integration-client";
+import type { ConnectorCatalogResponse, ConnectorConfig } from "./lib/connector-types";
+import { loadConnectorConfig, saveConnectorConfig } from "./lib/integration-store";
 import {
   getUpcomingRituals,
   resetWorkspace,
@@ -74,10 +78,52 @@ export default function App() {
   const [companyName, setCompanyName] = useState(DEFAULT_COMPANY_NAME);
   const [founderName, setFounderName] = useState(DEFAULT_FOUNDER_NAME);
   const [sharedRecap, setSharedRecap] = useState(() => readSharedRitualFromUrl());
+  const [connectorConfig, setConnectorConfig] = useState<ConnectorConfig>({
+    version: 1,
+    assignments: [],
+  });
+  const [connectorCatalog, setConnectorCatalog] = useState<ConnectorCatalogResponse | null>(null);
+  const [isRefreshingConnectors, setIsRefreshingConnectors] = useState(false);
+  const agentSignature = state.agents.map((agent) => agent.id).join("|");
+
+  async function refreshConnectorCatalog() {
+    setIsRefreshingConnectors(true);
+    try {
+      setConnectorCatalog(await fetchConnectorCatalog());
+    } catch {
+      setConnectorCatalog(null);
+    } finally {
+      setIsRefreshingConnectors(false);
+    }
+  }
 
   useEffect(() => {
     saveState(state);
   }, [state]);
+
+  useEffect(() => {
+    if (!state.company) {
+      return;
+    }
+
+    setConnectorConfig(loadConnectorConfig(state.agents));
+  }, [agentSignature, state.company?.id]);
+
+  useEffect(() => {
+    if (!state.company || connectorConfig.assignments.length === 0) {
+      return;
+    }
+
+    saveConnectorConfig(connectorConfig);
+  }, [connectorConfig, state.company]);
+
+  useEffect(() => {
+    if (!state.company) {
+      return;
+    }
+
+    void refreshConnectorCatalog();
+  }, [state.company]);
 
   useEffect(() => {
     if (!state.company) {
@@ -264,6 +310,40 @@ export default function App() {
             artifacts={state.artifacts}
             onRunWorkCycle={() => dispatch({ type: "run-work-cycle" })}
             onToggleActionItem={(actionId) => dispatch({ type: "toggle-action", actionId })}
+            workItems={state.workItems}
+          />
+        ) : null}
+
+        {selectedView === "integrations" ? (
+          <IntegrationsView
+            actionItems={state.actionItems}
+            agents={state.agents}
+            company={state.company}
+            connectorCatalog={connectorCatalog}
+            connectorConfig={connectorConfig}
+            isRefreshing={isRefreshingConnectors}
+            meetings={state.meetings}
+            memoryEntries={state.memoryEntries}
+            onRefresh={() => {
+              void refreshConnectorCatalog();
+            }}
+            onUpdateAssignment={(agentId, connectorId, mode) =>
+              setConnectorConfig((current) => ({
+                version: 1,
+                assignments: current.assignments.some((assignment) => assignment.agentId === agentId)
+                  ? current.assignments.map((assignment) =>
+                      assignment.agentId === agentId
+                        ? {
+                            ...assignment,
+                            connectorId,
+                            mode,
+                          }
+                        : assignment,
+                    )
+                  : [...current.assignments, { agentId, connectorId, mode }],
+              }))
+            }
+            selectedAgentId={selectedAgent.id}
             workItems={state.workItems}
           />
         ) : null}
