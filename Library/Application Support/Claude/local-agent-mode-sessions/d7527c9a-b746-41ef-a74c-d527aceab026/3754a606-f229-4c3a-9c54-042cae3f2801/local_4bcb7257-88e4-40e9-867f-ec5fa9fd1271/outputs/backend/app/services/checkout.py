@@ -51,6 +51,9 @@ def processar_webhook(payload, db: Session) -> dict:
 
     if payload.status == "paid":
         atualizar_status_pedido(pedido, "pago")
+        # Atualizar status do lead para "comprou"
+        if lead and lead.status != "comprou":
+            lead.status = "comprou"
         db.commit()
 
         # Criar entrega (apenas se nao existir)

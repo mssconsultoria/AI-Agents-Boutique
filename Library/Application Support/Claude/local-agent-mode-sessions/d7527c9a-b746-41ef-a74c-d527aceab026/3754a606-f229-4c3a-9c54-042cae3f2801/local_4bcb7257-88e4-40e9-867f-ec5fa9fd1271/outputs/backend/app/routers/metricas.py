@@ -2,14 +2,17 @@
 import csv
 import io
 from datetime import date
+from decimal import Decimal
 from typing import Optional, List
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+from sqlalchemy import func as sa_func
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_admin
 from app.database import get_db
 from app.models.campanha_metrica import CampanhaMetrica
+from app.models.pedido import Pedido
 from app.schemas.metrica import CampanhaMetricaCreate, CampanhaMetricaOut
 from app.services.metricas import calcular_metricas
 
@@ -153,3 +156,22 @@ def importar_csv(
         db.commit()
 
     return {"criados": criados, "erros": erros}
+
+
+@router.get("/receita-liquida")
+def receita_liquida(
+    db: Session = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
+):
+    """Receita liquida: SUM(valor_bruto - desconto) para pedidos pagos ou entregues."""
+    result = (
+        db.query(
+            sa_func.coalesce(
+                sa_func.sum(Pedido.valor_bruto - sa_func.coalesce(Pedido.desconto, 0)),
+                0,
+            )
+        )
+        .filter(Pedido.status.in_(["pago", "entregue"]))
+        .scalar()
+    )
+    return {"receita_liquida": float(result)}

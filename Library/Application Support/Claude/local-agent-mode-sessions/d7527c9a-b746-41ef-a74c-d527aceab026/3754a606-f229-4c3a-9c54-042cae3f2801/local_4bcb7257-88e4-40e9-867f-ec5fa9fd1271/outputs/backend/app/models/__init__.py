@@ -10,9 +10,10 @@ from app.models.edital import Edital
 from app.models.admin import Admin
 from app.models.audit_log import AuditLog
 from app.models.cupom import Cupom
+from app.models.threshold_config import ThresholdConfig
 
 __all__ = [
     "Concurso", "Produto", "Lead", "Pedido", "Entrega",
     "CampanhaMetrica", "Alerta", "TesteAB", "Edital",
-    "Admin", "AuditLog", "Cupom",
+    "Admin", "AuditLog", "Cupom", "ThresholdConfig",
 ]

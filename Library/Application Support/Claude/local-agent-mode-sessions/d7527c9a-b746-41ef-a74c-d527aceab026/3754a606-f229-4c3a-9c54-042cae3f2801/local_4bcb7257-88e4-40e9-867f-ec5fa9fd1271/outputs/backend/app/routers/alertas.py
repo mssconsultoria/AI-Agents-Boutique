@@ -1,5 +1,5 @@
 """Router para alertas de campanha."""
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.deps import get_current_admin
 from app.database import get_db
 from app.models.alerta import Alerta
+from app.models.threshold_config import ThresholdConfig
 
 router = APIRouter(prefix="/api/v1/alertas", tags=["alertas"])
 
@@ -59,3 +60,68 @@ def suprimir_alerta(
     alerta.status = "suprimido"
     db.commit()
     return {"detail": "Alerta suprimido"}
+
+
+class ThresholdItem(BaseModel):
+    tipo_alerta: str
+    valor_threshold: float
+
+
+class ThresholdUpdate(BaseModel):
+    thresholds: List[ThresholdItem]
+
+
+@router.get("/thresholds/{concurso_id}")
+def get_thresholds(
+    concurso_id: str,
+    db: Session = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
+):
+    import uuid as _uuid
+    try:
+        uid = _uuid.UUID(concurso_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Concurso nao encontrado")
+    configs = db.query(ThresholdConfig).filter(ThresholdConfig.concurso_id == uid).all()
+    return [
+        {
+            "id": str(c.id),
+            "concurso_id": str(c.concurso_id),
+            "tipo_alerta": c.tipo_alerta,
+            "valor_threshold": float(c.valor_threshold),
+        }
+        for c in configs
+    ]
+
+
+@router.put("/thresholds/{concurso_id}")
+def set_thresholds(
+    concurso_id: str,
+    body: ThresholdUpdate,
+    db: Session = Depends(get_db),
+    admin: dict = Depends(get_current_admin),
+):
+    import uuid as _uuid
+    try:
+        uid = _uuid.UUID(concurso_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Concurso nao encontrado")
+
+    # Upsert thresholds
+    for item in body.thresholds:
+        existing = (
+            db.query(ThresholdConfig)
+            .filter_by(concurso_id=uid, tipo_alerta=item.tipo_alerta)
+            .first()
+        )
+        if existing:
+            existing.valor_threshold = item.valor_threshold
+        else:
+            tc = ThresholdConfig(
+                concurso_id=uid,
+                tipo_alerta=item.tipo_alerta,
+                valor_threshold=item.valor_threshold,
+            )
+            db.add(tc)
+    db.commit()
+    return {"detail": "Thresholds atualizados"}
