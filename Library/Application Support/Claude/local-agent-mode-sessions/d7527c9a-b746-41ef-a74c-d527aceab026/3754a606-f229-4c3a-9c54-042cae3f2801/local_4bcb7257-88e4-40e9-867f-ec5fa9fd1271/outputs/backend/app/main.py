@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
+from app.core.middleware import HTTPSRedirectMiddleware, RateLimitMiddleware
 from app.routers.auth import router as auth_router
 from app.routers.concursos import router as concursos_router
 from app.routers.leads import router as leads_router
@@ -24,6 +25,10 @@ app.include_router(alertas_router)
 app.include_router(testes_ab_router)
 app.include_router(editais_router)
 app.include_router(pedidos_router)
+
+# Security middleware — registered BEFORE CORS so it runs first
+app.add_middleware(RateLimitMiddleware)
+app.add_middleware(HTTPSRedirectMiddleware)
 
 app.add_middleware(
     CORSMiddleware,

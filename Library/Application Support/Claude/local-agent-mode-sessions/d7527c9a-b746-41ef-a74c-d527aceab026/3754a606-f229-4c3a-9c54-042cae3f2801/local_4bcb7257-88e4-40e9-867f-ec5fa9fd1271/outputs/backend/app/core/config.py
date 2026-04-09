@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     n8n_webhook_url: str = ""
     telegram_bot_token: str = ""
     frontend_url: str = "http://localhost:3000"
+    environment: str = "development"
 
     model_config = {"env_file": ".env"}
 
