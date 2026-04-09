@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Column, Date, ForeignKey, String, UniqueConstraint
+from sqlalchemy import Column, DateTime, ForeignKey, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 
@@ -26,5 +26,5 @@ class Lead(Base):
     utm_campaign = Column(String(200))
     utm_content = Column(String(200))
     utm_term = Column(String(200))
-    created_at = Column(Date, server_default=func.now())
-    updated_at = Column(Date, server_default=func.now(), onupdate=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Boolean, Column, Date, ForeignKey, Numeric, String, Text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Numeric, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 
@@ -18,4 +18,4 @@ class Produto(Base):
     arquivo_url = Column(Text)
     destaque = Column(Boolean, default=False)
     ativo = Column(Boolean, default=True)
-    created_at = Column(Date, server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

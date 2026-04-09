@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Boolean, Column, Date, Integer, Numeric, String
+from sqlalchemy import Boolean, Column, Date, DateTime, Integer, Numeric, String
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.sql import func
 
@@ -24,5 +24,5 @@ class Concurso(Base):
     data_inscricao_fim = Column(Date)
     materias = Column(JSONB)
     ativo = Column(Boolean, default=True)
-    created_at = Column(Date, server_default=func.now())
-    updated_at = Column(Date, server_default=func.now(), onupdate=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
