@@ -53,7 +53,7 @@ export const PLANS: Record<PlanTier, PlanFeatures> = {
       "Suporte por email",
       "Atualizações de editais em tempo real",
     ],
-    stripePrice: process.env.STRIPE_PRICE_ESSENTIAL,
+    stripePrice: process.env.STRIPE_PRICE_ESSENTIAL || "",
   },
   premium: {
     name: "Premium",
@@ -70,7 +70,7 @@ export const PLANS: Record<PlanTier, PlanFeatures> = {
       "Relatórios personalizados",
       "Integração com terceiros",
     ],
-    stripePrice: process.env.STRIPE_PRICE_PREMIUM,
+    stripePrice: process.env.STRIPE_PRICE_PREMIUM || "",
   },
 };
 
@@ -127,4 +127,29 @@ export function getPricingPlans(): (PlanFeatures & { id: PlanTier })[] {
     id: tier,
     ...PLANS[tier],
   }));
+}
+
+/**
+ * Get Stripe price for a specific plan tier with validation
+ * Throws if price is not configured for the plan
+ */
+export function getCheckoutPrice(planTier: PlanTier): string {
+  const plan = PLANS[planTier];
+  if (!plan.stripePrice) {
+    throw new Error(`No Stripe price configured for plan: ${planTier}`);
+  }
+  return plan.stripePrice;
+}
+
+/**
+ * Validate that required Stripe environment variables are set
+ * Should be called on application startup
+ */
+export function validateStripeConfig(): void {
+  if (!process.env.STRIPE_PRICE_ESSENTIAL) {
+    throw new Error("STRIPE_PRICE_ESSENTIAL environment variable is not set");
+  }
+  if (!process.env.STRIPE_PRICE_PREMIUM) {
+    throw new Error("STRIPE_PRICE_PREMIUM environment variable is not set");
+  }
 }

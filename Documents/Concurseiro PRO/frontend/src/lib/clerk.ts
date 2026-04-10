@@ -1,7 +1,12 @@
 import { clerkClient } from "@clerk/nextjs/server";
+import { PlanTier } from "./plans";
+
+// Time constants
+const TRIAL_DURATION_DAYS = 7;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 export interface UserPlanMetadata {
-  tier: "trial" | "gratis" | "essencial" | "premium";
+  tier: PlanTier;
   trialStartedAt?: string; // ISO timestamp
   trialEndsAt?: string; // ISO timestamp
   questionsUsedToday: number;
@@ -55,7 +60,7 @@ export async function updateUserPlanMetadata(
  */
 export async function startUserTrial(userId: string): Promise<void> {
   const now = new Date();
-  const endsAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // +7 days
+  const endsAt = new Date(now.getTime() + TRIAL_DURATION_DAYS * MS_PER_DAY);
 
   await updateUserPlanMetadata(userId, {
     tier: "trial",
@@ -78,9 +83,18 @@ export async function checkTrialStatus(
   }
 
   const endsAt = new Date(metadata.trialEndsAt);
+
+  // Validate date parsing
+  if (isNaN(endsAt.getTime())) {
+    console.error(
+      `Invalid trial end date for user ${userId}: ${metadata.trialEndsAt}`
+    );
+    return { isTrialActive: false, daysRemaining: 0 };
+  }
+
   const now = new Date();
   const daysRemaining = Math.ceil(
-    (endsAt.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
+    (endsAt.getTime() - now.getTime()) / MS_PER_DAY
   );
 
   return {

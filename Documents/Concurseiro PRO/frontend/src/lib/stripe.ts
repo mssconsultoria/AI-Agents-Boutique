@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { PlanTier } from "./plans";
 
 // Initialize Stripe server-side client (Node.js only)
 // This will be called from API routes, NOT from the browser
@@ -19,6 +20,10 @@ export async function createCheckoutSession(
   returnUrl: string,
   successUrl: string
 ): Promise<string> {
+  if (!priceId) {
+    throw new Error("Invalid Stripe price ID provided to createCheckoutSession");
+  }
+
   const stripe = createStripeClient();
 
   const session = await stripe.checkout.sessions.create({
@@ -83,7 +88,7 @@ export async function getCustomerSubscriptions(
  * Map Stripe price ID to plan tier
  * Reverse lookup for determining user's plan from subscription
  */
-export function getPlanTierFromPriceId(priceId: string): string {
+export function getPlanTierFromPriceId(priceId: string): PlanTier {
   if (priceId === process.env.STRIPE_PRICE_ESSENTIAL) {
     return "essencial";
   }
