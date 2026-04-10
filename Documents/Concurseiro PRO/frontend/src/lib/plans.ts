@@ -1,6 +1,7 @@
 // Subscription tier definitions with features, pricing, and trial logic
 
 export type PlanTier = "gratis" | "essencial" | "premium" | "trial";
+export type PlanId = PlanTier; // Alias for middleware compatibility
 
 export interface PlanFeatures {
   name: string;
@@ -152,4 +153,43 @@ export function validateStripeConfig(): void {
   if (!process.env.STRIPE_PRICE_PREMIUM) {
     throw new Error("STRIPE_PRICE_PREMIUM environment variable is not set");
   }
+}
+
+/**
+ * Check if a trial is still active based on the expiration date
+ */
+export function isTrialActive(trialEndsAt: string | undefined): boolean {
+  if (!trialEndsAt) return false;
+  try {
+    const endDate = new Date(trialEndsAt);
+    return endDate > new Date();
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Determine if a user can access a specific route based on their plan and trial status
+ * Used by middleware for paywall enforcement
+ */
+export function canAccessRoute(
+  plan: PlanId,
+  trialActive: boolean,
+  pathname: string
+): boolean {
+  // Trial users can access everything
+  if (trialActive) return true;
+
+  // Free users can only access dashboard
+  if (plan === "gratis") {
+    return pathname === "/dashboard" || pathname === "/";
+  }
+
+  // Essential and Premium users can access dashboard and analytics
+  if (plan === "essencial" || plan === "premium") {
+    return true;
+  }
+
+  // Default deny
+  return false;
 }
