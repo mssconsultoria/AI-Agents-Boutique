@@ -4,7 +4,7 @@ export default function PublicFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-surface-container-lowest border-t border-surface-container-high/30">
+    <footer className="bg-surface-container-low">
       <div className="flex items-center justify-between px-12 py-8">
         {/* Left: Copyright */}
         <p className="text-[9px] uppercase tracking-[0.15em] text-on-surface-variant font-medium">

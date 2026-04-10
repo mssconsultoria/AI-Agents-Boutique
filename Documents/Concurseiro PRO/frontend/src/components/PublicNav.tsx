@@ -49,7 +49,7 @@ export default function PublicNav() {
             </Link>
             <Link
               href="/signup"
-              className="text-[12px] uppercase tracking-[0.15em] text-primary bg-primary/10 px-6 py-2 rounded-sm hover:bg-primary/20 transition-colors font-medium"
+              className="text-[12px] uppercase tracking-[0.15em] bg-primary text-on-primary editorial-gradient px-6 py-2 rounded-sm transition-colors font-medium"
             >
               Começar Grátis
             </Link>
@@ -57,7 +57,7 @@ export default function PublicNav() {
         ) : (
           <Link
             href="/dashboard"
-            className="text-[12px] uppercase tracking-[0.15em] text-primary bg-primary/10 px-6 py-2 rounded-sm hover:bg-primary/20 transition-colors font-medium"
+            className="text-[12px] uppercase tracking-[0.15em] bg-primary text-on-primary editorial-gradient px-6 py-2 rounded-sm transition-colors font-medium"
           >
             Meu Painel
           </Link>
