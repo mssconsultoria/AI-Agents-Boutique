@@ -1,0 +1,4 @@
+# file: /Users/marlow/Library/Application Support/Claude/local-agent-mode-sessions/d7527c9a-b746-41ef-a74c-d527aceab026/3754a606-f229-4c3a-9c54-042cae3f2801/local_4bcb7257-88e4-40e9-867f-ec5fa9fd1271/outputs/backend/app/models/pedido.py
+# hypothesis_version: 6.141.1
+
+[100, 'leads.id', 'pedidos', 'pendente', 'produtos.id']
