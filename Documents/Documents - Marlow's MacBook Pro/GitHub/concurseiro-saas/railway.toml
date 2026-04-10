@@ -1,0 +1,19 @@
+[形形形]
+name = "concurseiro-saas"
+
+[railway.services.backend]
+name = "backend"
+dockerfile = "backend/Dockerfile"
+healthcheck = "/health"
+port = 8000
+
+[railway.services.frontend]
+name = "frontend"
+dockerfile = "frontend/Dockerfile"
+buildCommand = "cd frontend && npm run build"
+startCommand = "npm run start"
+port = 3000
+
+[railway.services.postgres]
+name = "postgres"
+image = "postgres:16-alpine"
